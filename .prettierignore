@@ -5,3 +5,5 @@
 *.env
 .env
 .env.*
+
+# Ignores the foprmatting done by prettier in files written in '.prettierignore' format

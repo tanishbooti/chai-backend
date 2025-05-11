@@ -1,3 +1,5 @@
+#used .gitignore generator https://mrkandreev.name/snippets/gitignore-generator/#Node coz it gives the list of all files to ignore
+
 # Logs
 logs
 *.log

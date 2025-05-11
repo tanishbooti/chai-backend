@@ -7,6 +7,11 @@ const asyncHandler = (requestHandler) => {
 
 export { asyncHandler }
 
+// this is a higher-order function that takes a request handler function as an argument and returns a new function that handles errors. in detail, 
+// 1. it returns a function that takes req, res, and next as arguments.
+// 2. it calls the request handler function with req, res, and next as arguments.
+// 3. it uses Promise.resolve to ensure that the request handler function is executed as a promise.
+// 4. if the request handler function throws an error, it catches the error and passes it to the next middleware function using next(err).
 
 
 
