@@ -36,17 +36,17 @@ const registerUser = asyncHandler( async (req, res) => {
     // return res
 
 
-    const {fullName, email, username, password } = req.body
+    const {fullName, email, username, password } = req.body //req.body isiliye use kiya kyunki hum body se data le rahe hain or req post type hai
     //console.log("email: ", email);
 
     if (
-        [fullName, email, username, password].some((field) => field?.trim() === "")
+        [fullName, email, username, password].some((field) => field?.trim() === "") //this function checks if any field is empty
     ) {
-        throw new ApiError(400, "All fields are required")
+        throw new ApiError(400, "All fields are required") //check the arguments required from where function was defined
     }
 
     const existedUser = await User.findOne({
-        $or: [{ username }, { email }]
+        $or: [{ username }, { email }] //$or is used to check if either username or email exists..
     })
 
     if (existedUser) {
@@ -54,7 +54,9 @@ const registerUser = asyncHandler( async (req, res) => {
     }
     //console.log(req.files);
 
-    const avatarLocalPath = req.files?.avatar[0]?.path;
+    const avatarLocalPath = req.files?.avatar[0]?.path; 
+    //this is used to get the path of the avatar image from the request files. req.files is an object that contains all the files uploaded in the request. The avatar file is accessed using req.files.avatar, and the first file in the array is accessed using [0]. Finally, the path property of the file object is used to get the local path of the uploaded file.
+    //the ? operator is used to check if req.files and req.files.avatar are defined before trying to access the path property. If either of them is undefined, the expression will return undefined instead of throwing an error.
     //const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
     let coverImageLocalPath;
@@ -67,33 +69,37 @@ const registerUser = asyncHandler( async (req, res) => {
         throw new ApiError(400, "Avatar file is required")
     }
 
-    const avatar = await uploadOnCloudinary(avatarLocalPath)
+    const avatar = await uploadOnCloudinary(avatarLocalPath) //uploadoncloudinary is a function that uploads the image to cloudinary and returns the url of the image (which is already defined in utils/cloudinary.js)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if (!avatar) {
         throw new ApiError(400, "Avatar file is required")
     }
    
-
+    //This is how entry is created in the database
+    // user is the schema defined in models/user.model.js
     const user = await User.create({
         fullName,
         avatar: avatar.url,
-        coverImage: coverImage?.url || "",
+        coverImage: coverImage?.url || "", //we didn't check for cover image in the above code so we are using optional chaining here
         email, 
         password,
         username: username.toLowerCase()
     })
 
     const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken"
+        "-password -refreshToken" //just to check that user is created so we'll try to find user in User collection by it's id that's created by default in mongodb
+        //.select will select that user (created just now) but won't be selecting its password field and refreshToken
     )
 
-    if (!createdUser) {
+    if (!createdUser) { //check if user is created or not
         throw new ApiError(500, "Something went wrong while registering the user")
     }
 
     return res.status(201).json(
         new ApiResponse(200, createdUser, "User registered Successfully")
+        //this will return the user object created in the database
+        //api response is a class that is defined in utils/ApiResponse.js that will return the response in a standard format
     )
 
 } )
