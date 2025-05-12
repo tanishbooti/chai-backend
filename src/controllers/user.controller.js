@@ -9,12 +9,12 @@ import mongoose from "mongoose";
 
 const generateAccessAndRefereshTokens = async(userId) =>{
     try {
-        const user = await User.findById(userId)
-        const accessToken = user.generateAccessToken()
-        const refreshToken = user.generateRefreshToken()
+        const user = await User.findById(userId) //find the user by id
+        const accessToken = user.generateAccessToken() //generate access token using the function defined in user.model.js
+        const refreshToken = user.generateRefreshToken() //generate refresh token using the function defined in user.model.js
 
-        user.refreshToken = refreshToken
-        await user.save({ validateBeforeSave: false })
+        user.refreshToken = refreshToken //setting user's refresh token to the generated refresh token
+        await user.save({ validateBeforeSave: false }) //user vali entry save krdo as we updated the refresh token in the user model
 
         return {accessToken, refreshToken}
 
@@ -60,6 +60,9 @@ const registerUser = asyncHandler( async (req, res) => {
     //const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
     let coverImageLocalPath;
+    //the below code is used to check if coverImage is an array and has length greater than 0
+    //if it is then we are assigning the path of the first element of the array to coverImageLocalPath
+    //this is done to avoid errors in case coverImage is not an array or has no elements
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
         coverImageLocalPath = req.files.coverImage[0].path
     }
@@ -110,52 +113,49 @@ const loginUser = asyncHandler(async (req, res) =>{
     //find the user
     //password check
     //access and referesh token
-    //send cookie
+    //send cookies because cookies are more secure than local storage
+    //cookies are used to store data on the client side and are sent with every request to the server
 
-    const {email, username, password} = req.body
+    const {email, username, password} = req.body //take data from request body
     console.log(email);
-
+    //checks both username and email is empty  (helps to check if user is trying to login with email or username)
     if (!username && !email) {
         throw new ApiError(400, "username or email is required")
     }
-    
-    // Here is an alternative of above code based on logic discussed in video:
-    // if (!(username || email)) {
-    //     throw new ApiError(400, "username or email is required")
-        
-    // }
 
     const user = await User.findOne({
-        $or: [{username}, {email}]
+        $or: [{username}, {email}] //finding user by username or email
     })
 
-    if (!user) {
+    if (!user) { //if user isn't found, throw an error
         throw new ApiError(404, "User does not exist")
     }
 
-   const isPasswordValid = await user.isPasswordCorrect(password)
+   const isPasswordValid = await user.isPasswordCorrect(password) //this function is defined in user.model.js and it checks if the password is correct or not
+   //will return true or false
 
    if (!isPasswordValid) {
     throw new ApiError(401, "Invalid user credentials")
     }
 
-   const {accessToken, refreshToken} = await generateAccessAndRefereshTokens(user._id)
+   const {accessToken, refreshToken} = await generateAccessAndRefereshTokens(user._id) //generate access and refresh tokens using the function defined above
 
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken") //found user by id and selecting the user without password and refresh token
 
     const options = {
         httpOnly: true,
         secure: true
-    }
+    } //options for cookies
+    //httpOnly is used to make the cookie inaccessible to JavaScript's Document.cookie API, which helps to prevent cross-site scripting (XSS) attacks.
 
     return res
-    .status(200)
-    .cookie("accessToken", accessToken, options)
+    .status(200) //set the status code to 200
+    .cookie("accessToken", accessToken, options) //.cookie is used to set the cookie in the response. it takes the name of the cookie, value of the cookie and options as arguments
     .cookie("refreshToken", refreshToken, options)
     .json(
         new ApiResponse(
             200, 
-            {
+            { //data part as defined in ApiResponse function
                 user: loggedInUser, accessToken, refreshToken
             },
             "User logged In Successfully"
@@ -163,9 +163,10 @@ const loginUser = asyncHandler(async (req, res) =>{
     )
 
 })
-
+//ab logout krne ke liye, how do we access user coz during login we made him input email/username but for logout this can't be done as he may logout any other user
+//so we'll use middlewares: they are like "jaane se pehle milke jaana"
 const logoutUser = asyncHandler(async(req, res) => {
-    await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate( 
         req.user._id,
         {
             $unset: {
@@ -173,7 +174,8 @@ const logoutUser = asyncHandler(async(req, res) => {
             }
         },
         {
-            new: true
+            new: true //this means that we want to return the updated document
+            
         }
     )
 

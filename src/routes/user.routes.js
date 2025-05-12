@@ -35,7 +35,9 @@ router.route("/register").post(
 router.route("/login").post(loginUser)
 
 //secured routes
-router.route("/logout").post(verifyJWT,  logoutUser)
+router.route("/logout").post(verifyJWT,  logoutUser) //now in order to use middleware, we have to use it in the route. So just we before the controller function, we will use the middleware
+//verifyJWT is a middleware that checks if the user is authenticated by verifying the JWT token. If the token is valid, it allows the request to proceed to the next middleware or route handler.
+//so that 'next' will be the controller function (logoutUser)
 router.route("/refresh-token").post(refreshAccessToken)
 router.route("/change-password").post(verifyJWT, changeCurrentPassword)
 router.route("/current-user").get(verifyJWT, getCurrentUser)
