@@ -34,6 +34,7 @@ import playlistRouter from "./routes/playlist.routes.js"
 import dashboardRouter from "./routes/dashboard.routes.js"
 
 //routes declaration
+//we used app.use and not app.get because ab router ko laane ke liye middleware ki tarah kaam karna padta hai
 app.use("/api/v1/healthcheck", healthcheckRouter)
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/tweets", tweetRouter)

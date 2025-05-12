@@ -15,7 +15,7 @@ import {
 import {upload} from "../middlewares/multer.middleware.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
-
+//routers are used to define the routes for the application. They are responsible for handling incoming requests and sending appropriate responses. In this case, the userRouter is used to define routes related to user authentication and profile management.
 const router = Router()
 
 router.route("/register").post(

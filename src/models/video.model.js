@@ -33,7 +33,7 @@ const videoSchema = new Schema(
         },
         owner: {
             type: Schema.Types.ObjectId,
-            ref: "User"
+            ref: "User" //refers to the user who uploaded the video. that user is referred to by their id in userSchema
         }
 
     }, 
@@ -43,5 +43,9 @@ const videoSchema = new Schema(
 )
 
 videoSchema.plugin(mongooseAggregatePaginate)
-
+//.plugin adds  middleware to the schema
+// It adds a feature to your video schema so you can easily break big search results into pages.
+//Like showing 10 videos per page instead of all at once. That’s it.
+// It’s a way to make your app faster and easier to use.
+// It’s like a helper that makes sure you don’t get overwhelmed with too much information at once.
 export const Video = mongoose.model("Video", videoSchema)
